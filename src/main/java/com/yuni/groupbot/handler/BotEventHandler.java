@@ -1,7 +1,10 @@
 package com.yuni.groupbot.handler;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.yuni.groupbot.enums.BotEvent;
 import com.yuni.groupbot.model.websocket.BotWebSocketMessage;
+import com.yuni.groupbot.utils.MessageSender;
 
 import java.util.Set;
 
@@ -45,7 +48,10 @@ public interface BotEventHandler {
      * 发送响应消息
      */
     default void sendResponseMessage(BotWebSocketMessage message, String content) {
-
+        if (StrUtil.isNotBlank(content)) {
+            MessageSender sender = SpringUtil.getBean(MessageSender.class);
+            sender.reply2Group(message, content);
+        }
     }
 
     /**

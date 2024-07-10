@@ -1,5 +1,6 @@
 package com.yuni.groupbot.model.websocket;
 
+import com.alibaba.fastjson.JSONObject;
 import com.yuni.groupbot.enums.BotEvent;
 import lombok.Data;
 
@@ -38,5 +39,25 @@ public class BotWebSocketMessage {
     /**
      * d 代表事件内容，不同事件类型的事件内容格式都不同，请注意识别。
      */
-    private Object d;
+    private JSONObject d;
+
+    public String getContent() {
+        if (d != null) {
+            return d.getString("content");
+        }
+        return null;
+    }
+
+    public String getMsgId(){
+        if (d != null) {
+            return d.getString("id");
+        }
+        return null;    }
+
+    public String getGroupId() {
+        if (d != null) {
+            return d.getString("group_id");
+        }
+        return null;
+    }
 }

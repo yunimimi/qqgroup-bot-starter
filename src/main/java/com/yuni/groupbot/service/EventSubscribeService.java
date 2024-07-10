@@ -1,6 +1,7 @@
-package com.yuni.groupbot;
+package com.yuni.groupbot.service;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
@@ -18,25 +19,25 @@ import org.java_websocket.enums.ReadyState;
 import org.java_websocket.handshake.ServerHandshake;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author OvO
  * @date 2024/7/9 21:12
  */
 @Slf4j
+@Component
 public class EventSubscribeService implements InitializingBean {
     private WebSocketClient webSocketClient;
 
     private List<BotEventHandler> messageHandlerList;
-
+    @Autowired
     private RequestUtil requestUtil;
-
+    @Autowired
     private BotConfiguration botConfiguration;
 
     private Integer index = null;
@@ -44,6 +45,9 @@ public class EventSubscribeService implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        Map<String, BotEventHandler> handlerMap = SpringUtil.getBeansOfType(BotEventHandler.class);
+        this.messageHandlerList = new ArrayList<>(handlerMap.values());
+
         String webSocketUrl = JSONObject.parseObject(requestUtil.get("/gateway")).getString("url");
         webSocketClient = new WebSocketClient(new URI(webSocketUrl)) {
             @Override
@@ -81,6 +85,7 @@ public class EventSubscribeService implements InitializingBean {
         };
         webSocketClient.connect();
 
+
         new Thread(() -> {
             while (true) {
                 sendHeartbeatMessage();
@@ -98,7 +103,7 @@ public class EventSubscribeService implements InitializingBean {
         if (webSocketClient.getReadyState() == ReadyState.OPEN) {
             HeartbeatMessage heartbeatMessage = new HeartbeatMessage(index);
             String s = JSONObject.toJSONString(heartbeatMessage);
-            log.info("send heartbeat :{}", s);
+//            log.info("send heartbeat :{}", s);
             webSocketClient.send(s);
         }
     }

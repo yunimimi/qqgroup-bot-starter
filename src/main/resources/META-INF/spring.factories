@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.yuni.groupbot.config.GroupBotAutoConfiguration
+com.yuni.groupbot.GroupBotAutoConfiguration

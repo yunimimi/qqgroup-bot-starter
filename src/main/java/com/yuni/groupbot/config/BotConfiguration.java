@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "bot")
 public class BotConfiguration {
 
-    private String name;
+    private Boolean enable;
 
     private String appId;
 
@@ -20,7 +20,8 @@ public class BotConfiguration {
 
     private String token;
 
-    private String apiHost;
+    private String apiHost ="https://sandbox.api.sgroup.qq.com";
 
-    private Long heartbeatInterval;
+    private Long heartbeatInterval = 10*1000L;
+
 }
