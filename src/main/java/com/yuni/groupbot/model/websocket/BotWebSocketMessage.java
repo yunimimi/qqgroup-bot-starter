@@ -60,4 +60,11 @@ public class BotWebSocketMessage {
         }
         return null;
     }
+
+    public String getUserId(){
+        if (d != null) {
+            return d.getJSONObject("author").getString("user_openid");
+        }
+        return null;
+    }
 }

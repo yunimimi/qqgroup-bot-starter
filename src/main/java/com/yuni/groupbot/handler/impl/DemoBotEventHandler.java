@@ -26,4 +26,9 @@ public class DemoBotEventHandler implements BotEventHandler{
     public Set<BotEvent> subscribe() {
         return CollectionUtil.newHashSet(BotEvent.GROUP_AT_MESSAGE_CREATE );
     }
+
+    @Override
+    public boolean match(BotWebSocketMessage message) {
+        return true;
+    }
 }

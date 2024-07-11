@@ -40,9 +40,7 @@ public interface BotEventHandler {
     /**
      * 可自定义匹配逻辑
      */
-    default boolean match(BotWebSocketMessage message) {
-        return true;
-    }
+     boolean match(BotWebSocketMessage message);
 
     /**
      * 发送响应消息
@@ -50,7 +48,7 @@ public interface BotEventHandler {
     default void sendResponseMessage(BotWebSocketMessage message, String content) {
         if (StrUtil.isNotBlank(content)) {
             MessageSender sender = SpringUtil.getBean(MessageSender.class);
-            sender.reply2Group(message, content);
+            sender.reply(message, content);
         }
     }
 

@@ -58,12 +58,12 @@ public class EventSubscribeService implements InitializingBean {
 
             @Override
             public void onMessage(String message) {
-                log.info("\n收到WebSocket消息：\n{}", JSONUtil.formatJsonStr(message));
                 JSONObject object = JSONObject.parseObject(message);
                 if (object.containsKey("s")) {
                     index = object.getInteger("s");
                 }
                 try {
+                    log.info("\n收到WebSocket消息：\n{}", JSONUtil.formatJsonStr(message));
                     BotWebSocketMessage webSocketMessage = JSONObject.parseObject(message, BotWebSocketMessage.class);
                     messageHandlerList.forEach(a -> a.accept(webSocketMessage));
                 } catch (JSONException ignored) {
@@ -80,7 +80,7 @@ public class EventSubscribeService implements InitializingBean {
 
             @Override
             public void onError(Exception ex) {
-                ex.printStackTrace();
+                log.error("WebSocket连接发生错误：{}", ex.getMessage(),ex);
             }
         };
         webSocketClient.connect();
