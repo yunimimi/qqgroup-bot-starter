@@ -29,12 +29,12 @@ public interface BotEventHandler {
      */
     Set<BotEvent> subscribe();
 
-    default void accept(BotWebSocketMessage message) {
+    default String apply(BotWebSocketMessage message) {
         if (this.subscribe().contains(message.getT()) && this.match(message)) {
             String response = this.handle(message);
-            sendResponseMessage(message, response);
-            this.postProcessing(message);
+            return this.postProcessing(message, response);
         }
+        return null;
     }
 
     /**
@@ -42,21 +42,12 @@ public interface BotEventHandler {
      */
     boolean match(BotWebSocketMessage message);
 
-    /**
-     * 发送响应消息
-     */
-    default void sendResponseMessage(BotWebSocketMessage message, String content) {
-        if (StrUtil.isNotBlank(content)) {
-            MessageSender sender = SpringUtil.getBean(MessageSender.class);
-            sender.reply(message, content);
-        }
-    }
 
     /**
      * 自定义后处理逻辑
      */
-    default void postProcessing(BotWebSocketMessage message) {
-
+    default String postProcessing(BotWebSocketMessage message, String resp) {
+        return resp;
     }
 
     Set<String> botName();

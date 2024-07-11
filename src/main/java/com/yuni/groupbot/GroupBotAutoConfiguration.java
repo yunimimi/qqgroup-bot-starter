@@ -7,6 +7,7 @@ import com.yuni.groupbot.handler.impl.DemoBotEventHandler;
 import com.yuni.groupbot.model.context.BotProperties;
 import com.yuni.groupbot.service.BotService;
 import com.yuni.groupbot.service.EventSubscribeService;
+import com.yuni.groupbot.task.TimedTask;
 import com.yuni.groupbot.utils.MessageSender;
 import com.yuni.groupbot.utils.RequestUtil;
 import com.yuni.groupbot.utils.TokenUtil;
@@ -46,5 +47,10 @@ public class GroupBotAutoConfiguration {
                     .filter(a -> a.botName().contains(botProperties.getName())).collect(Collectors.toList());
             SpringUtil.registerBean(botProperties.getName(), new BotService(botProperties, all));
         }
+    }
+
+    @Bean
+    public TimedTask timedTask(){
+        return new TimedTask();
     }
 }

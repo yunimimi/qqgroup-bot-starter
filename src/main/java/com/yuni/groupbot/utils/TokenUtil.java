@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.yuni.groupbot.config.BotConfiguration;
 import com.yuni.groupbot.model.context.BotProperties;
 import com.yuni.groupbot.model.websocket.AuthMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 
 import java.util.HashMap;
@@ -16,12 +17,18 @@ import java.util.HashMap;
  * @author zhuangwenqiang
  * @date 2024/7/10 上午11:41
  */
-public class TokenUtil implements InitializingBean {
+@Slf4j
+public class TokenUtil {
 
     private BotProperties properties;
 
     public TokenUtil(BotProperties properties) {
         this.properties = properties;
+        refreshAccessToken();
+    }
+
+    public boolean expiringSoon() {
+        return System.currentTimeMillis() > expireAt - (30 * 1000);
     }
 
     private String accessToken = "";
@@ -34,7 +41,7 @@ public class TokenUtil implements InitializingBean {
         d.put("token", getWebSocketToken());
     }
 
-    private void refreshAccessToken() {
+    public void refreshAccessToken() {
         HttpRequest post = HttpUtil.createPost("https://bots.qq.com/app/getAppAccessToken");
         HashMap<String, String> map = new HashMap<>();
         map.put("appId", properties.getAppId());
@@ -46,23 +53,6 @@ public class TokenUtil implements InitializingBean {
             accessToken = resp.getString("access_token");
             expireAt = System.currentTimeMillis() + (resp.getInteger("expires_in") * 1000);
         }
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        refreshAccessToken();
-        new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                }
-                if (System.currentTimeMillis() > expireAt - (30 * 1000)) {
-                    refreshAccessToken();
-                }
-            }
-
-        }).start();
     }
 
     private String getWebSocketToken() {

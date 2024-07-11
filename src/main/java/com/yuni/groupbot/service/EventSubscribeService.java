@@ -1,6 +1,7 @@
 package com.yuni.groupbot.service;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONException;
@@ -13,6 +14,7 @@ import com.yuni.groupbot.model.context.BotProperties;
 import com.yuni.groupbot.model.websocket.AuthMessage;
 import com.yuni.groupbot.model.websocket.BotWebSocketMessage;
 import com.yuni.groupbot.model.websocket.HeartbeatMessage;
+import com.yuni.groupbot.utils.MessageSender;
 import com.yuni.groupbot.utils.RequestUtil;
 import com.yuni.groupbot.utils.TokenUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -45,13 +47,16 @@ public class EventSubscribeService {
 
     private TokenUtil tokenUtil;
 
+    private MessageSender messageSender;
+
     private Integer index = null;
 
-    public EventSubscribeService(List<BotEventHandler> messageHandlerList, RequestUtil requestUtil, TokenUtil tokenUtil,BotProperties botConfiguration) {
+    public EventSubscribeService(List<BotEventHandler> messageHandlerList, RequestUtil requestUtil, TokenUtil tokenUtil, MessageSender sender, BotProperties botConfiguration) {
         this.messageHandlerList = messageHandlerList;
         this.requestUtil = requestUtil;
         this.tokenUtil = tokenUtil;
         this.botConfiguration = botConfiguration;
+        this.messageSender = sender;
     }
 
     public void init() {
@@ -74,7 +79,17 @@ public class EventSubscribeService {
                     try {
                         BotWebSocketMessage webSocketMessage = JSONObject.parseObject(message, BotWebSocketMessage.class);
                         log.info("\n[{}]收到WebSocket消息：\n{}", botConfiguration.getName(), JSONUtil.formatJsonStr(message));
-                        messageHandlerList.forEach(a -> a.accept(webSocketMessage));
+                        if (webSocketMessage.getOp() == 10) {
+                            Long interval = webSocketMessage.getD().getLong("heartbeat_interval");
+                            sendHeartbeatTask(interval);
+                        } else {
+                            messageHandlerList.forEach(a -> {
+                                String resp = a.apply(webSocketMessage);
+                                if (StrUtil.isNotBlank(resp)) {
+                                    messageSender.reply(webSocketMessage, resp);
+                                }
+                            });
+                        }
                     } catch (JSONException ignored) {
 
                     } catch (Exception e) {
@@ -84,7 +99,7 @@ public class EventSubscribeService {
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
-                    System.out.println("连接已关闭");
+                    log.error("【{}】连接关闭:{}", botConfiguration.getName(), reason);
                 }
 
                 @Override
@@ -93,23 +108,13 @@ public class EventSubscribeService {
                 }
             };
             webSocketClient.connect();
-            new Thread(() -> {
-                while (true) {
-                    sendHeartbeatMessage();
-                    try {
-                        Thread.sleep(botConfiguration.getHeartbeatInterval());
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }).start();
             log.info("机器人【{}】启动成功!", botConfiguration.getName());
         } catch (Exception e) {
 
         }
     }
 
-    private void sendHeartbeatMessage() {
+    public void sendHeartbeatMessage() {
         if (webSocketClient.getReadyState() == ReadyState.OPEN) {
             HeartbeatMessage heartbeatMessage = new HeartbeatMessage(index);
             String s = JSONObject.toJSONString(heartbeatMessage);
@@ -133,7 +138,21 @@ public class EventSubscribeService {
         for (int intent : intentSet) {
             result |= intent;
         }
+
         return result;
+    }
+
+    private void sendHeartbeatTask(Long sleep) {
+        new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                sendHeartbeatMessage();
+            }
+        }).start();
     }
 
 }
