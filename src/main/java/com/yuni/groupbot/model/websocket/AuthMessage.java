@@ -20,7 +20,6 @@ public class AuthMessage {
         JSONObject d = new JSONObject();
         d.put("intents", intents);
         this.d = d;
-        TokenUtil tokenUtil = SpringUtil.getBean(TokenUtil.class);
-        tokenUtil.addWebSocketToken(this);
+
     }
 }

@@ -7,6 +7,7 @@ import com.yuni.groupbot.model.websocket.BotWebSocketMessage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -30,5 +31,10 @@ public class DemoBotEventHandler implements BotEventHandler{
     @Override
     public boolean match(BotWebSocketMessage message) {
         return true;
+    }
+
+    @Override
+    public Set<String> botName() {
+        return Collections.emptySet();
     }
 }

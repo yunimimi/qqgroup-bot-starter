@@ -40,7 +40,7 @@ public interface BotEventHandler {
     /**
      * 可自定义匹配逻辑
      */
-     boolean match(BotWebSocketMessage message);
+    boolean match(BotWebSocketMessage message);
 
     /**
      * 发送响应消息
@@ -58,5 +58,8 @@ public interface BotEventHandler {
     default void postProcessing(BotWebSocketMessage message) {
 
     }
+
+    Set<String> botName();
+
 
 }

@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.yuni.groupbot.model.http.SendMessageDTO;
 import com.yuni.groupbot.model.websocket.BotWebSocketMessage;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,14 +12,16 @@ import org.springframework.stereotype.Component;
  * @author zhuangwenqiang
  * @date 2024/7/10 下午2:50
  */
+@AllArgsConstructor
 public class MessageSender {
 
     private final int TARGET_TYPE_USER = 0;
 
     private final int TARGET_TYPE_GROUP = 1;
 
-    @Autowired
     private RequestUtil requestUtil;
+
+
 
     public void reply(BotWebSocketMessage botWebSocketMessage, String content) {
         if (botWebSocketMessage.getGroupId() != null) {
@@ -46,7 +49,7 @@ public class MessageSender {
     }
 
     private void sendMessage(String id, int targetType, SendMessageDTO sendMessageDTO) {
-        String url = targetType == 0 ? StrUtil.format("/v2/users/{}/messages", id) : StrUtil.format("/v2/groups/{}/messages", id);
+        String url = targetType == TARGET_TYPE_USER ? StrUtil.format("/v2/users/{}/messages", id) : StrUtil.format("/v2/groups/{}/messages", id);
         requestUtil.post(url, sendMessageDTO);
     }
 

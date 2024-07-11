@@ -7,23 +7,19 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.yuni.groupbot.config.BotConfiguration;
+import com.yuni.groupbot.model.context.BotProperties;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * @author OvO
  * @date 2024/7/9 20:25
  */
 @Slf4j
+@AllArgsConstructor
 public class RequestUtil {
 
-    private BotConfiguration botConfiguration;
-
-    public RequestUtil(BotConfiguration botConfiguration) {
-        this.botConfiguration = botConfiguration;
-    }
+    private BotProperties properties;
 
     public String get(String url) {
         return executeRequest(Method.GET, url, null);
@@ -36,10 +32,10 @@ public class RequestUtil {
 
 
     private String executeRequest(Method method, String url, String body) {
-        HttpRequest request = HttpUtil.createRequest(method, botConfiguration.getApiHost() + url);
+        HttpRequest request = HttpUtil.createRequest(method, properties.getApiHost() + url);
         request.body(body);
         request.header("Authorization", StrUtil.format(
-                "Bot {}.{}", botConfiguration.getAppId(), botConfiguration.getToken()
+                "Bot {}.{}", properties.getAppId(), properties.getToken()
         ));
         try (HttpResponse execute = request.execute()) {
             String response = execute.body();

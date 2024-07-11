@@ -6,10 +6,9 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.yuni.groupbot.config.BotConfiguration;
+import com.yuni.groupbot.model.context.BotProperties;
 import com.yuni.groupbot.model.websocket.AuthMessage;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 
@@ -19,10 +18,10 @@ import java.util.HashMap;
  */
 public class TokenUtil implements InitializingBean {
 
-    private BotConfiguration botConfiguration;
+    private BotProperties properties;
 
-    public TokenUtil(BotConfiguration botConfiguration) {
-        this.botConfiguration = botConfiguration;
+    public TokenUtil(BotProperties properties) {
+        this.properties = properties;
     }
 
     private String accessToken = "";
@@ -38,8 +37,8 @@ public class TokenUtil implements InitializingBean {
     private void refreshAccessToken() {
         HttpRequest post = HttpUtil.createPost("https://bots.qq.com/app/getAppAccessToken");
         HashMap<String, String> map = new HashMap<>();
-        map.put("appId", botConfiguration.getAppId());
-        map.put("clientSecret", botConfiguration.getSecret());
+        map.put("appId", properties.getAppId());
+        map.put("clientSecret", properties.getSecret());
         post.body(JSONObject.toJSONString(map));
         try (HttpResponse execute = post.execute()) {
             String body = execute.body();
