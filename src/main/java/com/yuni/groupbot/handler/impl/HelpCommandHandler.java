@@ -39,6 +39,8 @@ public class HelpCommandHandler implements KeywordCommandHandler {
             if (StrUtil.isNotBlank(handler.instructions())) {
                 template.append(StrUtil.format("    说明：【{}】\r\n", handler.instructions()));
             }
+            template.append("\r\n");
+
         }
         context.setReply(template.toString());
     }
