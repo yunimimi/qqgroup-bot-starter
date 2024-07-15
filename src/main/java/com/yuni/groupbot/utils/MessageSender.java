@@ -25,7 +25,7 @@ public class MessageSender {
 
     private RequestUtil requestUtil;
 
-    private Map<String,String> replaceMap;
+    private Map<String, String> replaceMap;
 
     public void reply(BotEventContext context) {
         if (context.getGroupId() != null) {
@@ -53,6 +53,13 @@ public class MessageSender {
     }
 
     private void sendMessage(String id, int targetType, SendMessageDTO sendMessageDTO) {
+        String content = sendMessageDTO.getContent();
+        if (replaceMap != null && !replaceMap.isEmpty()) {
+            for (Map.Entry<String, String> entry : replaceMap.entrySet()) {
+                content = content.replaceAll(entry.getKey(), entry.getValue());
+            }
+            sendMessageDTO.setContent(content);
+        }
         String url = targetType == TARGET_TYPE_USER ? StrUtil.format("/v2/users/{}/messages", id) : StrUtil.format("/v2/groups/{}/messages", id);
         requestUtil.post(url, sendMessageDTO);
     }
