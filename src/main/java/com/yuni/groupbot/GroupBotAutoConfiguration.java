@@ -41,7 +41,7 @@ public class GroupBotAutoConfiguration {
                 BotEventHandler handler = SpringUtil.getBean(string, BotEventHandler.class);
                 handlers.add(handler);
             }
-            SpringUtil.registerBean(botProperties.getName(), new BotService(botProperties, handlers));
+            SpringUtil.registerBean(botProperties.getName(), new BotService(botProperties, handlers, botConfiguration.getKeywordReplaceMap()));
         }
     }
 

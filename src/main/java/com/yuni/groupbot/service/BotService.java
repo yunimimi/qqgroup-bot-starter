@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author zhuangwenqiang
@@ -30,11 +31,11 @@ public class BotService {
 
     private List<BotEventHandler> messageHandlerList;
 
-    public BotService(BotProperties properties, List<BotEventHandler> messageHandlerList) {
+    public BotService(BotProperties properties, List<BotEventHandler> messageHandlerList, Map<String,String> replaceMap) {
         this.properties = properties;
         this.messageHandlerList = messageHandlerList;
         this.requestUtil = new RequestUtil(properties);
-        this.messageSender = new MessageSender(requestUtil);
+        this.messageSender = new MessageSender(requestUtil,replaceMap);
         this.tokenUtil = new TokenUtil(properties);
         this.eventSubscribeService = new EventSubscribeService(messageHandlerList, requestUtil, tokenUtil, messageSender, properties);
         eventSubscribeService.init();

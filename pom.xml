@@ -6,7 +6,7 @@
 
     <groupId>io.github.yunimimi</groupId>
     <artifactId>groupbot-spring-boot-starter</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 
     <name>group-bot-spring-boot-starter</name>
     <description>group-bot-spring-boot-starter</description>

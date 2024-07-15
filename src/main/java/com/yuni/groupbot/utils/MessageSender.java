@@ -8,6 +8,9 @@ import com.yuni.groupbot.model.websocket.BotWebSocketMessage;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import sun.dc.pr.PRError;
+
+import java.util.Map;
 
 /**
  * @author zhuangwenqiang
@@ -21,6 +24,8 @@ public class MessageSender {
     private final int TARGET_TYPE_GROUP = 1;
 
     private RequestUtil requestUtil;
+
+    private Map<String,String> replaceMap;
 
     public void reply(BotEventContext context) {
         if (context.getGroupId() != null) {
