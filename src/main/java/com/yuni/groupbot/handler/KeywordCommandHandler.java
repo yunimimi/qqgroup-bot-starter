@@ -32,7 +32,7 @@ public interface KeywordCommandHandler extends BotEventHandler {
     default boolean match(BotEventContext context) {
         String content = context.getContent();
         if (content != null && content.startsWith("/" + keyword())) {
-            context.setContent(content.replace("/" + keyword(), ""));
+            context.setContent(content.replace("/" + keyword(), "").trim());
             return true;
         }
         return false;
