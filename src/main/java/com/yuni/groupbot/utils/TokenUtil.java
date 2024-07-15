@@ -5,11 +5,9 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.yuni.groupbot.config.BotConfiguration;
-import com.yuni.groupbot.model.context.BotProperties;
+import com.yuni.groupbot.model.properties.BotProperties;
 import com.yuni.groupbot.model.websocket.AuthMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
 
 import java.util.HashMap;
 

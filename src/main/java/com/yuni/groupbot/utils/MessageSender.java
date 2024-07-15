@@ -2,6 +2,7 @@ package com.yuni.groupbot.utils;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.yuni.groupbot.model.BotEventContext;
 import com.yuni.groupbot.model.http.SendMessageDTO;
 import com.yuni.groupbot.model.websocket.BotWebSocketMessage;
 import lombok.AllArgsConstructor;
@@ -21,31 +22,29 @@ public class MessageSender {
 
     private RequestUtil requestUtil;
 
-
-
-    public void reply(BotWebSocketMessage botWebSocketMessage, String content) {
-        if (botWebSocketMessage.getGroupId() != null) {
-            reply2Group(botWebSocketMessage, content);
+    public void reply(BotEventContext context) {
+        if (context.getGroupId() != null) {
+            reply2Group(context);
         } else {
-            reply2User(botWebSocketMessage, content);
+            reply2User(context);
         }
     }
 
-    public void reply2Group(BotWebSocketMessage botWebSocketMessage, String content) {
+    public void reply2Group(BotEventContext context) {
         SendMessageDTO dto = new SendMessageDTO();
-        dto.setContent(content);
+        dto.setContent(context.getReply());
         dto.setMsg_type(0);
-        dto.setMsg_id(botWebSocketMessage.getMsgId());
-        sendMessage(botWebSocketMessage.getGroupId(), TARGET_TYPE_GROUP, dto);
+        dto.setMsg_id(context.getMsgId());
+        sendMessage(context.getGroupId(), TARGET_TYPE_GROUP, dto);
     }
 
 
-    public void reply2User(BotWebSocketMessage botWebSocketMessage, String content) {
+    public void reply2User(BotEventContext context) {
         SendMessageDTO dto = new SendMessageDTO();
-        dto.setContent(content);
+        dto.setContent(context.getReply());
         dto.setMsg_type(0);
-        dto.setMsg_id(botWebSocketMessage.getMsgId());
-        sendMessage(botWebSocketMessage.getUserId(), TARGET_TYPE_USER, dto);
+        dto.setMsg_id(context.getMsgId());
+        sendMessage(context.getUserId(), TARGET_TYPE_USER, dto);
     }
 
     private void sendMessage(String id, int targetType, SendMessageDTO sendMessageDTO) {

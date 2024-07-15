@@ -1,6 +1,8 @@
-package com.yuni.groupbot.model.context;
+package com.yuni.groupbot.model.properties;
 
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class BotProperties {
@@ -18,4 +20,6 @@ public class BotProperties {
     private String apiHost = "https://sandbox.api.sgroup.qq.com";
 
     private Long heartbeatInterval = 10 * 1000L;
+
+    private List<String> eventHandlers;
 }

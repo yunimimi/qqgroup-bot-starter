@@ -7,7 +7,7 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.yuni.groupbot.model.context.BotProperties;
+import com.yuni.groupbot.model.properties.BotProperties;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

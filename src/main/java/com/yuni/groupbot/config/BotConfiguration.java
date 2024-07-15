@@ -1,9 +1,8 @@
 package com.yuni.groupbot.config;
 
-import com.yuni.groupbot.model.context.BotProperties;
+import com.yuni.groupbot.model.properties.BotProperties;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
@@ -16,6 +15,5 @@ import java.util.List;
 public class BotConfiguration {
 
     private List<BotProperties> propertiesList;
-
 
 }

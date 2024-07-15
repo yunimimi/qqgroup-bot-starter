@@ -1,16 +1,14 @@
 package com.yuni.groupbot.service;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.yuni.groupbot.config.BotConfiguration;
 import com.yuni.groupbot.enums.BotEvent;
 import com.yuni.groupbot.enums.BotEventGroup;
 import com.yuni.groupbot.handler.BotEventHandler;
-import com.yuni.groupbot.model.context.BotProperties;
+import com.yuni.groupbot.model.BotEventContext;
+import com.yuni.groupbot.model.properties.BotProperties;
 import com.yuni.groupbot.model.websocket.AuthMessage;
 import com.yuni.groupbot.model.websocket.BotWebSocketMessage;
 import com.yuni.groupbot.model.websocket.HeartbeatMessage;
@@ -21,11 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.enums.ReadyState;
 import org.java_websocket.handshake.ServerHandshake;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.util.*;
@@ -43,7 +36,7 @@ public class EventSubscribeService {
 
     private RequestUtil requestUtil;
 
-    private BotProperties botConfiguration;
+    private BotProperties botProperties;
 
     private TokenUtil tokenUtil;
 
@@ -51,11 +44,11 @@ public class EventSubscribeService {
 
     private Integer index = null;
 
-    public EventSubscribeService(List<BotEventHandler> messageHandlerList, RequestUtil requestUtil, TokenUtil tokenUtil, MessageSender sender, BotProperties botConfiguration) {
+    public EventSubscribeService(List<BotEventHandler> messageHandlerList, RequestUtil requestUtil, TokenUtil tokenUtil, MessageSender sender, BotProperties botProperties) {
         this.messageHandlerList = messageHandlerList;
         this.requestUtil = requestUtil;
         this.tokenUtil = tokenUtil;
-        this.botConfiguration = botConfiguration;
+        this.botProperties = botProperties;
         this.messageSender = sender;
     }
 
@@ -78,28 +71,42 @@ public class EventSubscribeService {
                     }
                     try {
                         BotWebSocketMessage webSocketMessage = JSONObject.parseObject(message, BotWebSocketMessage.class);
-                        log.info("\n[{}]收到WebSocket消息：\n{}", botConfiguration.getName(), JSONUtil.formatJsonStr(message));
+                        log.info("\n[{}]收到WebSocket消息：\n{}", botProperties.getName(), JSONUtil.formatJsonStr(message));
                         if (webSocketMessage.getOp() == 10) {
                             Long interval = webSocketMessage.getD().getLong("heartbeat_interval");
                             sendHeartbeatTask(interval);
                         } else {
-                            messageHandlerList.forEach(a -> {
-                                String resp = a.apply(webSocketMessage);
-                                if (StrUtil.isNotBlank(resp)) {
-                                    messageSender.reply(webSocketMessage, resp);
+                            BotEventContext context = new BotEventContext();
+                            context.setEvent(webSocketMessage.getT());
+                            context.setBotProperties(botProperties);
+                            context.setContent(webSocketMessage.getContent());
+                            context.setUserId(webSocketMessage.getUserId());
+                            context.setGroupId(webSocketMessage.getGroupId());
+                            context.setMsgId(webSocketMessage.getMsgId());
+                            log.info("context：{}", context);
+                            for (BotEventHandler handler : messageHandlerList) {
+                                if (handler.subscribe().contains(context.getEvent()) && handler.match(context)) {
+                                    log.info("{} match", handler.getClass().getSimpleName());
+                                    handler.handle(context);
+                                    handler.postProcessing(context);
+                                    if (context.getReply() != null) {
+                                        log.info("reply {} ", context.getReply());
+                                        messageSender.reply(context);
+                                    }
+                                    break;
                                 }
-                            });
+                            }
                         }
                     } catch (JSONException ignored) {
 
                     } catch (Exception e) {
-                        log.error("消息处理失败：{}", e.getMessage());
+                        log.error("消息处理失败：{}", e.getMessage(), e);
                     }
                 }
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
-                    log.error("【{}】连接关闭:{}", botConfiguration.getName(), reason);
+                    log.error("【{}】连接关闭:{}", botProperties.getName(), reason);
                 }
 
                 @Override
@@ -108,7 +115,7 @@ public class EventSubscribeService {
                 }
             };
             webSocketClient.connect();
-            log.info("机器人【{}】启动成功!", botConfiguration.getName());
+            log.info("机器人【{}】启动成功!", botProperties.getName());
         } catch (Exception e) {
 
         }

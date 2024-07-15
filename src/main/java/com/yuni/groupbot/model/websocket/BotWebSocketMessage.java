@@ -42,17 +42,18 @@ public class BotWebSocketMessage {
     private JSONObject d;
 
     public String getContent() {
-        if (d != null) {
-            return d.getString("content");
+        if (d != null && d.getString("content") != null) {
+            return d.getString("content").trim();
         }
         return null;
     }
 
-    public String getMsgId(){
+    public String getMsgId() {
         if (d != null) {
             return d.getString("id");
         }
-        return null;    }
+        return null;
+    }
 
     public String getGroupId() {
         if (d != null) {
@@ -61,8 +62,8 @@ public class BotWebSocketMessage {
         return null;
     }
 
-    public String getUserId(){
-        if (d != null) {
+    public String getUserId() {
+        if (d != null && d.getJSONObject("author") != null) {
             return d.getJSONObject("author").getString("user_openid");
         }
         return null;

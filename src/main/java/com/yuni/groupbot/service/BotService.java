@@ -1,12 +1,12 @@
 package com.yuni.groupbot.service;
 
 import com.yuni.groupbot.handler.BotEventHandler;
-import com.yuni.groupbot.model.context.BotProperties;
+import com.yuni.groupbot.model.properties.BotProperties;
 import com.yuni.groupbot.utils.MessageSender;
 import com.yuni.groupbot.utils.RequestUtil;
 import com.yuni.groupbot.utils.TokenUtil;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -15,6 +15,7 @@ import java.util.List;
  * @date 2024/7/11 下午4:10
  */
 @Data
+@Slf4j
 public class BotService {
 
     private BotProperties properties;
@@ -37,5 +38,6 @@ public class BotService {
         this.tokenUtil = new TokenUtil(properties);
         this.eventSubscribeService = new EventSubscribeService(messageHandlerList, requestUtil, tokenUtil, messageSender, properties);
         eventSubscribeService.init();
+        log.info("{}机器人初始化，handler：【{}】",properties.getName(),messageHandlerList);
     }
 }
