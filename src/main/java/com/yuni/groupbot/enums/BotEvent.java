@@ -198,6 +198,9 @@ public enum BotEvent {
      */
     PUBLIC_MESSAGE_DELETE,
 
+    READY,
+    RESUMED,
+
     ;
 
 }

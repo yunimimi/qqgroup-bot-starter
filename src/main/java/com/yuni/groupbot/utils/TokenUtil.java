@@ -53,7 +53,7 @@ public class TokenUtil {
         }
     }
 
-    private String getWebSocketToken() {
+    public  String getWebSocketToken() {
         return StrUtil.format("QQBot {}", accessToken);
     }
 }
