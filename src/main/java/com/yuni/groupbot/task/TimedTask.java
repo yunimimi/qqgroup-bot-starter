@@ -36,6 +36,12 @@ public class TimedTask {
         }
     }
 
+    @Scheduled(initialDelay = 3600 * 60, fixedDelay = 3600 * 60)
+    public void reconnect() {
+        for (BotService service : services) {
+            service.getEventSubscribeService().reconnect();
+        }
+    }
 
 
     private void init() {

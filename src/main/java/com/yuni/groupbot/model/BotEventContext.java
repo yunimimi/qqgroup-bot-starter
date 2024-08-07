@@ -25,6 +25,16 @@ public class BotEventContext {
 
     private String content;
 
+    /**
+     * 0 是文本，2 是 markdown， 3 ark，4 embed，7 media 富媒体
+     */
+    private Integer msgType = 0;
+
+    /**
+     *  1 图片，2 视频，3 语音
+     */
+    private Integer mediaType;
+
     private String reply;
 
     private BotEvent event;

@@ -3,14 +3,9 @@ package com.yuni.groupbot.utils;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.yuni.groupbot.model.BotEventContext;
+import com.yuni.groupbot.model.http.MediaDTO;
 import com.yuni.groupbot.model.http.SendMessageDTO;
-import com.yuni.groupbot.model.websocket.BotWebSocketMessage;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import sun.dc.pr.PRError;
-
-import java.util.Map;
 
 /**
  * @author zhuangwenqiang
@@ -19,50 +14,66 @@ import java.util.Map;
 @AllArgsConstructor
 public class MessageSender {
 
-    private final int TARGET_TYPE_USER = 0;
-
-    private final int TARGET_TYPE_GROUP = 1;
-
     private RequestUtil requestUtil;
 
-    private Map<String, String> replaceMap;
-
     public void reply(BotEventContext context) {
-        if (context.getGroupId() != null) {
-            reply2Group(context);
+        switch (context.getMsgType()) {
+            case 0:
+                replyMessage(context);
+                break;
+            case 7:
+                replyMedia(context);
+                break;
+        }
+    }
+
+    private void replyMedia(BotEventContext context) {
+        String fileUrl = context.getReply();
+        if (fileUrl == null) {
+            return;
+        }
+        String postUrl;
+        if (context.getGroupId() == null) {
+            postUrl = StrUtil.format("/v2/users/{}/files", context.getUserId());
         } else {
-            reply2User(context);
+            postUrl = StrUtil.format("/v2/groups/{}/files", context.getGroupId());
         }
+        JSONObject param = new JSONObject();
+        param.put("file_type", context.getMediaType());
+        param.put("url", fileUrl);
+        param.put("srv_send_msg", false);
+
+        String response = requestUtil.post(postUrl, param);
+        JSONObject object = JSONObject.parseObject(response);
+        String fileInfo = object.getString("file_info");
+
+        SendMessageDTO dto = new SendMessageDTO();
+        dto.setMsg_type(7);
+        dto.setMsg_id(context.getMsgId());
+        MediaDTO mediaDTO = new MediaDTO();
+        mediaDTO.setFile_info(fileInfo);
+        dto.setMedia(mediaDTO);
+        sendMessage(context, dto);
     }
 
-    public void reply2Group(BotEventContext context) {
+
+    private void replyMessage(BotEventContext context) {
         SendMessageDTO dto = new SendMessageDTO();
         dto.setContent(context.getReply());
         dto.setMsg_type(0);
         dto.setMsg_id(context.getMsgId());
-        sendMessage(context.getGroupId(), TARGET_TYPE_GROUP, dto);
+        sendMessage(context, dto);
     }
 
-
-    public void reply2User(BotEventContext context) {
-        SendMessageDTO dto = new SendMessageDTO();
-        dto.setContent(context.getReply());
-        dto.setMsg_type(0);
-        dto.setMsg_id(context.getMsgId());
-        sendMessage(context.getUserId(), TARGET_TYPE_USER, dto);
-    }
-
-    private void sendMessage(String id, int targetType, SendMessageDTO sendMessageDTO) {
-        String content = sendMessageDTO.getContent();
-        if (replaceMap != null && !replaceMap.isEmpty()) {
-            for (Map.Entry<String, String> entry : replaceMap.entrySet()) {
-                content = content.replaceAll(entry.getKey(), entry.getValue());
-            }
-            sendMessageDTO.setContent(content);
+    private void sendMessage(BotEventContext context, SendMessageDTO sendMessageDTO) {
+        String url;
+        if (context.getGroupId() == null) {
+            url = StrUtil.format("/v2/users/{}/messages", context.getUserId());
+        } else {
+            sendMessageDTO.setGroup_openid(context.getGroupId());
+            url = StrUtil.format("/v2/groups/{}/messages", context.getGroupId());
         }
-        String url = targetType == TARGET_TYPE_USER ? StrUtil.format("/v2/users/{}/messages", id) : StrUtil.format("/v2/groups/{}/messages", id);
         requestUtil.post(url, sendMessageDTO);
     }
-
 
 }

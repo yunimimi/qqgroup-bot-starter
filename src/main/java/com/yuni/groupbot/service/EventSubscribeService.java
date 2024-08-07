@@ -16,6 +16,7 @@ import com.yuni.groupbot.model.websocket.ResumeMessage;
 import com.yuni.groupbot.utils.MessageSender;
 import com.yuni.groupbot.utils.RequestUtil;
 import com.yuni.groupbot.utils.TokenUtil;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
@@ -30,8 +31,8 @@ import java.util.*;
  * @date 2024/7/9 21:12
  */
 @Slf4j
-
 public class EventSubscribeService {
+
     private WebSocketClient webSocketClient;
 
     private List<BotEventHandler> messageHandlerList;
@@ -54,6 +55,14 @@ public class EventSubscribeService {
         this.tokenUtil = tokenUtil;
         this.botProperties = botProperties;
         this.messageSender = sender;
+    }
+
+    @SneakyThrows
+    public void reconnect(){
+        log.info("【{}】定时重连机器人",botProperties.getName());
+        webSocketClient.closeBlocking();
+        log.info("【{}】webSocketClient关闭成功",botProperties.getName());
+        init();
     }
 
     public void init() {

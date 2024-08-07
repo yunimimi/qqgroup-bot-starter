@@ -35,7 +35,7 @@ public class BotService {
         this.properties = properties;
         this.messageHandlerList = messageHandlerList;
         this.requestUtil = new RequestUtil(properties);
-        this.messageSender = new MessageSender(requestUtil,replaceMap);
+        this.messageSender = new MessageSender(requestUtil);
         this.tokenUtil = new TokenUtil(properties);
         this.eventSubscribeService = new EventSubscribeService(messageHandlerList, requestUtil, tokenUtil, messageSender, properties);
         eventSubscribeService.init();
